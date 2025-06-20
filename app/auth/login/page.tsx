@@ -1,7 +1,13 @@
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
+import { supabase } from "@/lib/supabaseClient"
 
 export default function Login(){
+
+    const handleSocialOauth = (provider: "google" | "github") => {
+
+    }
+
     return <>
         <Navbar />
         <div className="container mt-5">
@@ -21,8 +27,8 @@ export default function Login(){
             </form>
 
             <div className="text-center mt-3">
-                <button className="btn btn-danger mx-2">Google</button>
-                <button className="btn btn-dark mx-2">Github</button>
+                <button className="btn btn-danger mx-2" onClick={ handleSocialOauth("google") }>Google</button>
+                <button className="btn btn-dark mx-2" onClick={ handleSocialOauth("github") }>Github</button>
             </div>
             <p className="text-center mt-3">
                 Don't have an account <a href="/auth/register">Register</a>
