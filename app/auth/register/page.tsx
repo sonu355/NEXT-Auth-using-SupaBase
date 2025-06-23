@@ -5,7 +5,9 @@ import Footer from "@/components/Footer"
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { use } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import toast from "react-hot-toast";
 
 const formSchema = yup.object().shape({
    fullName: yup.string().required("Full name is required"),
@@ -18,6 +20,8 @@ const formSchema = yup.object().shape({
 
 export default function Register(){
 
+    const router = useRouter();
+
     const {
         register,
         handleSubmit,
@@ -28,8 +32,26 @@ export default function Register(){
         resolver: yupResolver(formSchema)
     })
 
-    const onSubmit = (formdata: any) => {
-        console.log(formdata)
+    const onSubmit = async (formdata: any) => {
+        //  console.log(formdata)
+        const{fullName, email, gender, password, phone} = formdata;
+        const{data, error} = await supabase.auth.signUp({
+            email,
+            password,
+            options:{
+                data:{
+                    fullName,
+                    gender,
+                    phone
+                }
+            }
+        });
+        if(error){
+            toast.error("failed to register user")
+        }else{
+            toast.success("User registered sucessfully")
+            router.push("/auth/login")
+        }
     }
 
     return <>
