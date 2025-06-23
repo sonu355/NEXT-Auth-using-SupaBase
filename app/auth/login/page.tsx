@@ -9,9 +9,17 @@ import { myAppHook } from "@/context/AppUtils";
 import { useRouter } from "next/navigation";
 
 export default function Login(){
+
+    const router = useRouter()
+    const { isLoggedIn } = myAppHook()
+
     useEffect(() => {
 
-    }, [])
+        if(isLoggedIn){
+            router.push("/auth/dashboard");
+            return;
+        }
+    }, [isLoggedIn])
 
     const handleSocialOauth = async (provider: "google" | "github") => {
 

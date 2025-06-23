@@ -9,6 +9,7 @@ import { myAppHook } from "@/context/AppUtils";
 import { error } from "console";
 import { Toast,toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { totalmem } from "os";
 
 export default function Dashboard(){
 
@@ -23,21 +24,25 @@ export default function Dashboard(){
         const { data, error } = await supabase.auth.getSession();
         console.log(data)
         if(error){
-          toast.error("failed to get data")
-          router.push("/auth/login")
-          return
+          toast.error("failed to get data");
+          router.push("/auth/login");
+          return;
         }
-        setAuthToken(data.session?.access_token)
-        setUserId(data.session?.user.id)
-        localStorage.setItem("access_token", data.session?.access_token)
-        setIsLoggedin(true);
+        if(data.session?.access_token){
+          setAuthToken(data.session?.access_token);
+          setUserId(data.session?.user.id);
+          localStorage.setItem("access_token", data.session?.access_token);
+          setIsLoggedin(true);
+          toast.success("User logged in successfully")
+        }
       }
+
+      handleLoginSession()
 
       if(!isLoggedIn){
         router.push("/auth/login");
         return;
       }
-      handleLoginSession()
     }, [])
   
     return <>

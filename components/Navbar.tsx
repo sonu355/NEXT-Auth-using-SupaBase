@@ -3,6 +3,7 @@ import Link from "next/link";
 import { myAppHook } from "@/context/AppUtils";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
  
 const Navbar = () => {
 
@@ -15,6 +16,7 @@ const Navbar = () => {
         setIsLoggedin(false)
         setAuthToken(null)
         await supabase.auth.signOut()
+        toast.error("User logged out sucessfully")
         router.push("/auth/login")
     }   
 
