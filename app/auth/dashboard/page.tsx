@@ -3,14 +3,45 @@
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import Image from "next/image"
-import { useState } from "react"
+import { use, useEffect, useState } from "react"
+import { supabase } from "@/lib/supabase";
+import { myAppHook } from "@/context/AppUtils";
+import { error } from "console";
+import { Toast,toast } from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 export default function Dashboard(){
 
     const [previewImage, setPreviewImage] = useState<null>(null)
     const [products, setProducts] = useState<null>(null)
+    const[userId, setUserId] = useState<null>(null)
+    const {setAuthToken, setIsLoggedin, isLoggedIn} = myAppHook()
+    const router = useRouter()
+
+    useEffect(() => {
+      const handleLoginSession = async () =>{
+        const { data, error } = await supabase.auth.getSession();
+        console.log(data)
+        if(error){
+          toast.error("failed to get data")
+          router.push("/auth/login")
+          return
+        }
+        setAuthToken(data.session?.access_token)
+        setUserId(data.session?.user.id)
+        localStorage.setItem("access_token", data.session?.access_token)
+        setIsLoggedin(true);
+      }
+
+      if(!isLoggedIn){
+        router.push("/auth/login");
+        return;
+      }
+      handleLoginSession()
+    }, [])
   
     return <>
+      <Navbar />
       <div className="container mt-5">
         <div className="row">
           <div className="col-md-5">
@@ -83,5 +114,6 @@ export default function Dashboard(){
           </div>
         </div>
       </div>
+      <Footer />
     </>
 }

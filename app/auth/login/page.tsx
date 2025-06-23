@@ -1,11 +1,29 @@
+"use client";
+
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
-import { supabase } from "@/lib/supabaseClient"
+import { supabase } from "@/lib/supabase"
+import toast from "react-hot-toast"
+import { useEffect } from "react";
+import { myAppHook } from "@/context/AppUtils";
+import { useRouter } from "next/navigation";
 
 export default function Login(){
+    useEffect(() => {
 
-    const handleSocialOauth = (provider: "google" | "github") => {
+    }, [])
 
+    const handleSocialOauth = async (provider: "google" | "github") => {
+
+        const {data, error} = await supabase.auth.signInWithOAuth({
+            provider,
+            options: {
+                redirectTo: `${window.location.origin}/auth/dashboard`
+            }
+        })
+        if (error) {
+            toast.error("Failed to login Social Oauth")
+        }
     }
 
     return <>
@@ -27,8 +45,8 @@ export default function Login(){
             </form>
 
             <div className="text-center mt-3">
-                <button className="btn btn-danger mx-2" onClick={ handleSocialOauth("google") }>Google</button>
-                <button className="btn btn-dark mx-2" onClick={ handleSocialOauth("github") }>Github</button>
+                <button className="btn btn-danger mx-2" onClick={ () =>handleSocialOauth("google") }>Google</button>
+                <button className="btn btn-dark mx-2" onClick={ () => handleSocialOauth("github") }>Github</button>
             </div>
             <p className="text-center mt-3">
                 Don't have an account <a href="/auth/register">Register</a>

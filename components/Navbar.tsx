@@ -1,10 +1,22 @@
 "use client"
 import Link from "next/link";
 import { myAppHook } from "@/context/AppUtils";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
  
 const Navbar = () => {
 
-    const { isLoggedIn } = myAppHook();
+    const { isLoggedIn, setIsLoggedin, setAuthToken } = myAppHook();
+
+    const router = useRouter()
+
+    const handleUserLogout = async () => {
+        localStorage.removeItem("access_token")
+        setIsLoggedin(false)
+        setAuthToken(null)
+        await supabase.auth.signOut()
+        router.push("/auth/login")
+    }   
 
     return <>
         <nav className="navbar navbar-expand-lg px-4" style={{backgroundColor: "#343a40"}}>
@@ -15,7 +27,7 @@ const Navbar = () => {
                     <div className="ms-auto">
                         <Link href="/auth/dashboard" className="me-3 text-white text-decoration-none">Dashboard</Link>
                         <Link href="/auth/profile" className="me-3 text-white text-decoration-none">Profile</Link>
-                        <button className="btn btn-danger">Logout</button>
+                        <button className="btn btn-danger" onClick={ handleUserLogout }>Logout</button>
                     </div>
                 ) : (
                     <div className="ms-auto">
