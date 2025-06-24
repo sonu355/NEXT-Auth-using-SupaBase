@@ -1,5 +1,4 @@
 "use client";
-
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import Image from "next/image"
@@ -16,13 +15,13 @@ export default function Dashboard(){
     const [previewImage, setPreviewImage] = useState<null>(null)
     const [products, setProducts] = useState<null>(null)
     const[userId, setUserId] = useState<null>(null)
-    const {setAuthToken, setIsLoggedin, isLoggedIn} = myAppHook()
+    const {setAuthToken, setIsLoggedin, isLoggedIn, setUserProfile} = myAppHook()
     const router = useRouter()
 
     useEffect(() => {
       const handleLoginSession = async () =>{
         const { data, error } = await supabase.auth.getSession();
-        console.log(data)
+        console.log("data",data)
         if(error){
           toast.error("failed to get data");
           router.push("/auth/login");
@@ -33,7 +32,14 @@ export default function Dashboard(){
           setUserId(data.session?.user.id);
           localStorage.setItem("access_token", data.session?.access_token);
           setIsLoggedin(true);
-          toast.success("User logged in successfully")
+          setUserProfile({
+            name: data.session.user?.user_metadata.fullName,
+            email: data.session.user?.user_metadata.email,
+            gender: data.session.user?.user_metadata.gender,
+            phone: data.session.user?.user_metadata.phone
+          })
+          console.log("setUserProfile",setUserProfile)
+       //   toast.success("User logged in successfully")
         }
       }
 

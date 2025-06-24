@@ -5,6 +5,8 @@ interface AppUtilsType{
     isLoggedIn: boolean,
     setIsLoggedin: (state: boolean) => void
     setAuthToken: (state: null) => void
+    setUserProfile: (state: null) => void
+    userProfile: null
 }
 
 const AppUtilsContext = createContext<AppUtilsType | undefined>(undefined)
@@ -12,9 +14,11 @@ const AppUtilsContext = createContext<AppUtilsType | undefined>(undefined)
 export const AppUtilsProvider = ({children} : {children: React.ReactNode}) =>{
     const[isLoggedIn, setIsLoggedin] = useState<boolean>(false) 
     const[authtoken, setAuthToken] = useState<null|string>(null)
+    const[userProfile, setUserProfile] = useState<null>(null)
 
     useEffect(() => {
         const token = localStorage.getItem("access_token")
+        const userProfile = localStorage.getItem("user_profile")
         if(token){
             setAuthToken(token)
             setIsLoggedin(true)
@@ -22,7 +26,7 @@ export const AppUtilsProvider = ({children} : {children: React.ReactNode}) =>{
     }, [])
 
     return(
-        <AppUtilsContext.Provider value={{ isLoggedIn,setAuthToken, setIsLoggedin }}>
+        <AppUtilsContext.Provider value={{ isLoggedIn,setAuthToken, setIsLoggedin, userProfile, setUserProfile }}>
             {children}
         </AppUtilsContext.Provider>
     )
