@@ -1,5 +1,6 @@
 "use client"
 import React, { createContext, useContext, useEffect, useState} from "react";
+import { json } from "stream/consumers";
 
 interface AppUtilsType{
     isLoggedIn: boolean,
@@ -22,6 +23,7 @@ export const AppUtilsProvider = ({children} : {children: React.ReactNode}) =>{
         if(token){
             setAuthToken(token)
             setIsLoggedin(true)
+            setUserProfile(JSON.parse(userProfile))
         }
     }, [])
 

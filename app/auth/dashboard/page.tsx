@@ -39,6 +39,14 @@ export default function Dashboard(){
             phone: data.session.user?.user_metadata.phone
           })
           console.log("setUserProfile",setUserProfile)
+          localStorage.setItem("user_profile", JSON.stringify(
+            {
+            name: data.session.user?.user_metadata.fullName,
+            email: data.session.user?.user_metadata.email,
+            gender: data.session.user?.user_metadata.gender,
+            phone: data.session.user?.user_metadata.phone
+          }
+          ))
        //   toast.success("User logged in successfully")
         }
       }

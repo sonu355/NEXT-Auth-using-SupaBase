@@ -1,5 +1,6 @@
 "use client"
 
+
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import * as yup from "yup";
