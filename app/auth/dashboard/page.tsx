@@ -67,9 +67,8 @@ export default function Dashboard(){
               email: data.session.user?.user_metadata.email,
               gender: data.session.user?.user_metadata.gender,
               phone: data.session.user?.user_metadata.phone
-            }
-          ))
-       //   toast.success("User logged in successfully")
+            }))
+            fetchProductsFromProducts(data.session.user.id);
         }
       }
 
@@ -95,7 +94,7 @@ export default function Dashboard(){
     }
 
     const onFormSubmit = async (formData: any) => {
-      console.log(formData)
+    //  console.log(formData)
       let imagePath = null;
       if(formData.banner_image instanceof File){
         imagePath = await uploadImageFile(formData.banner_image)
@@ -113,6 +112,15 @@ export default function Dashboard(){
         toast.success("product has been created successfully")
       }
       reset();
+      setPreviewImage(null);
+    }
+
+    const fetchProductsFromProducts = async (userId : string) => {
+        const {data, error} = await supabase.from("products").select("*").eq("user_id", userId);
+        console.log(data)
+        if(data){
+          setProducts(data);
+        }
     }
   
     return <>
@@ -168,20 +176,23 @@ export default function Dashboard(){
               </thead>
               <tbody>
                 {
-                  products ? (
-                    <tr>
-                      <td>Sample Product</td>
-                      <td>Sample Content</td>
-                      <td>$100</td>
+                  products ? products.map( (singleProducts, index) => (
+                    <tr key={index}>
+                      <td>{singleProducts.title}</td>
+                      <td>{singleProducts.content}</td>
+                      <td>{singleProducts.cost}</td>
                       <td>
-                        {/* <Image src="" alt="Sample Product" width="50" /> */}
+                        {
+                          singleProducts.banner_image ? (<Image src={singleProducts.banner_image} alt="Sample Product" width="50" height= { 50 } />) : ("--")
+                        }
+                        
                       </td>
                       <td>
                         <button className="btn btn-primary btn-sm">Edit</button>
                         <button className="btn btn-danger btn-sm" style={{marginLeft: "10px"}}>Delete</button>
                       </td>
                   </tr>
-                  ) : (
+                  )) : (
                     <tr>
                       <td colSpan={5} className="text-center">No products found.</td>
                     </tr>

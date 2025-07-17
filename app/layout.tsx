@@ -15,10 +15,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AppUtilsProvider>
-          <Toaster />
-          {children}
-        </AppUtilsProvider>
+        <div id="app-root">
+          <AppUtilsProvider>
+            <Toaster />
+            {children}
+          </AppUtilsProvider>
+        </div>
       </body>
     </html>
   );
