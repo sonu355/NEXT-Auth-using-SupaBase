@@ -17,7 +17,6 @@ const formSchema = yup.object().shape({
 })
 
 export default function Login(){
-
     const router = useRouter()
     const { isLoggedIn, setIsLoggedin, setAuthToken } = myAppHook()
 

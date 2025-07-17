@@ -10,20 +10,18 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import * as yup from "yup"
 import { yupResolver } from "@hookform/resolvers/yup";
-import { title } from "process";
-import { error } from "console";
-
+    
 interface ProductType{
-  id?: string,
+  id?: number,
   title: string,
   content?: string,
   cost?: string,
   banner_image?: string | File | null
 }
 
-const formSchema = yup.object().shape({
+const formSchema = yup.object().shape({ 
   title: yup.string().required("title is required"),
-  content: yup.string().required("Description is required"),
+  content: yup.string().required("description is required"),
   cost: yup.string().required("product cost is required")
 })
 
@@ -36,7 +34,7 @@ export default function Dashboard(){
     const {setAuthToken, setIsLoggedin, isLoggedIn, setUserProfile} = myAppHook()
     const router = useRouter()
 
-    const{ register,setValue, handleSubmit, formState: {
+    const{ register, reset, setValue, handleSubmit, formState: {
       errors
     }} = useForm({
       resolver: yupResolver(formSchema)
@@ -45,10 +43,10 @@ export default function Dashboard(){
     useEffect(() => {
       const handleLoginSession = async () =>{
         const { data, error } = await supabase.auth.getSession();
-        console.log("data",data)
+        //  console.log("data",data)
         if(error){
           toast.error("failed to get data");
-          router.push("/auth/login");
+          router.push("/auth/login"); 
           return;
         }
         if(data.session?.access_token){
@@ -65,11 +63,11 @@ export default function Dashboard(){
           //console.log("setUserProfile",setUserProfile)
           localStorage.setItem("user_profile", JSON.stringify(
             {
-            name: data.session.user?.user_metadata.fullName,
-            email: data.session.user?.user_metadata.email,
-            gender: data.session.user?.user_metadata.gender,
-            phone: data.session.user?.user_metadata.phone
-          }
+              name: data.session.user?.user_metadata.fullName,
+              email: data.session.user?.user_metadata.email,
+              gender: data.session.user?.user_metadata.gender,
+              phone: data.session.user?.user_metadata.phone
+            }
           ))
        //   toast.success("User logged in successfully")
         }
@@ -83,9 +81,9 @@ export default function Dashboard(){
       }
     }, [])
 
-    const uploadImageFile = async (file: File) => {
+      const uploadImageFile = async (file: File) => {
       const fileExtension = file.name.split(".").pop();
-      const fileName = `${ Date.now() }.$file{ fileExtension }`;
+      const fileName = `${ Date.now() }.${ fileExtension }`;
 
       const { data, error } = await supabase.storage.from("product-images").upload(fileName, file)
 
@@ -97,10 +95,24 @@ export default function Dashboard(){
     }
 
     const onFormSubmit = async (formData: any) => {
+      console.log(formData)
       let imagePath = null;
       if(formData.banner_image instanceof File){
         imagePath = await uploadImageFile(formData.banner_image)
+        if(!imagePath) return;
       }
+      const { data, error } = await supabase.from("proucts").insert({
+        ...formData,
+        user_id : userId,
+        banner_image : imagePath
+      });
+      if (error) {
+        toast.error("failed to add product")
+        console.log(error, "error")
+      } else {
+        toast.success("product has been created successfully")
+      }
+      reset();
     }
   
     return <>
@@ -109,7 +121,7 @@ export default function Dashboard(){
         <div className="row">
           <div className="col-md-5">
             <h3>Add Product</h3>
-            <form onSubmit={ handleSubmit(onFormSubmit)} >
+            <form onSubmit={ handleSubmit(onFormSubmit) }>
               <div className="mb-3">
                 <label className="form-label">Title</label>
                 <input type="text" className="form-control" {...register("title")}/>
