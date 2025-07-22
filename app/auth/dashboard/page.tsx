@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import * as yup from "yup"
 import { yupResolver } from "@hookform/resolvers/yup";
+import Swal from "sweetalert2";
     
 interface ProductType{
   id?: number,
@@ -30,8 +31,9 @@ export default function Dashboard(){
     const [previewImage, setPreviewImage] = useState<null>(null)
     const [products, setProducts] = useState<ProductType | null>(null)
     const[userId, setUserId] = useState<null>(null)
+    const[editId, setEditId] = useState(null)
 
-    const {setAuthToken, setIsLoggedin, isLoggedIn, setUserProfile} = myAppHook()
+    const {setAuthToken, setIsLoggedin, isLoggedIn, setUserProfile, setIsLoading} = myAppHook()
     const router = useRouter()
 
     const{ register, reset, setValue, handleSubmit, formState: {
@@ -49,6 +51,7 @@ export default function Dashboard(){
           router.push("/auth/login"); 
           return;
         }
+        setIsLoading(true)
         if(data.session?.access_token){
           setAuthToken(data.session?.access_token);
           setUserId(data.session?.user.id);
@@ -70,6 +73,7 @@ export default function Dashboard(){
             }))
             fetchProductsFromProducts(data.session.user.id);
         }
+        setIsLoading(false)
       }
 
       handleLoginSession()
@@ -94,33 +98,92 @@ export default function Dashboard(){
     }
 
     const onFormSubmit = async (formData: any) => {
-    //  console.log(formData)
-      let imagePath = null;
+      setIsLoading(true)
+      //  console.log(formData)
+      let imagePath = formData.banner_image;
       if(formData.banner_image instanceof File){
         imagePath = await uploadImageFile(formData.banner_image)
         if(!imagePath) return;
       }
-      const { data, error } = await supabase.from("proucts").insert({
-        ...formData,
-        user_id : userId,
-        banner_image : imagePath
-      });
-      if (error) {
-        toast.error("failed to add product")
-        console.log(error, "error")
+
+      if (editId) {
+        const{ data, error } = await supabase.from("products").update({
+          ...formData,
+          banner_image: imagePath
+        }).match({
+          id: editId,
+          user_id: userId
+        })
+        if (error) {
+          toast.error("failed to update product data")
+        } else {
+          toast.success("products updated successfully")
+        }
       } else {
-        toast.success("product has been created successfully")
+        const { data, error } = await supabase.from("products").insert({
+          ...formData,
+          user_id : userId,
+          banner_image : imagePath
+        });
+        if (error) {
+          toast.error("failed to add product")
+          console.log(error, "error")
+        } else {
+          toast.success("product has been created successfully")
+        }
+          reset();
       }
-      reset();
       setPreviewImage(null);
+      fetchProductsFromProducts(userId!)      
+      setIsLoading(false)
     }
 
     const fetchProductsFromProducts = async (userId : string) => {
+        setIsLoading(true)
         const {data, error} = await supabase.from("products").select("*").eq("user_id", userId);
         console.log(data)
         if(data){
           setProducts(data);
         }
+        setIsLoading(false)
+    }
+
+    const handleEditData = (product: ProductType) => {
+      console.log(product)
+      setValue("title", product.title)
+      // console.log(product.title);
+      setValue("cost", product.cost)
+      setValue("content", product.content)
+      setValue("banner_image", product.banner_image)
+      setPreviewImage(product.banner_image)
+      setEditId(product.id)
+      //  reset();
+    }
+
+    const handleDeleteProduct = (id: number) => {
+
+      Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!"
+        }).then( async (result) => {
+          if (result.isConfirmed) {
+            const{ data, error } = await supabase.from("products").delete().match({
+              id: id,
+              user_id: userId
+            })
+            if (error) {
+              toast.error("failed to delete")
+            } else {
+              toast.success("product deleted successfully")
+            fetchProductsFromProducts(userId!)
+            }
+          }
+        });
     }
   
     return <>
@@ -128,7 +191,7 @@ export default function Dashboard(){
       <div className="container mt-5">
         <div className="row">
           <div className="col-md-5">
-            <h3>Add Product</h3>
+            <h3>{editId ? "Edit Product" : "Add Product"}</h3>
             <form onSubmit={ handleSubmit(onFormSubmit) }>
               <div className="mb-3">
                 <label className="form-label">Title</label>
@@ -158,7 +221,7 @@ export default function Dashboard(){
                 <small className="text-danger"></small>
               </div>
               <button type="submit" className="btn btn-success w-100">
-                Add Product
+                {editId ? "Update Product" : "Add Product"}
               </button>
             </form>
           </div>
@@ -188,8 +251,9 @@ export default function Dashboard(){
                         
                       </td>
                       <td>
-                        <button className="btn btn-primary btn-sm">Edit</button>
-                        <button className="btn btn-danger btn-sm" style={{marginLeft: "10px"}}>Delete</button>
+                        <button className="btn btn-primary btn-sm" onClick={ () => handleEditData(singleProducts)}>Edit</button>
+                        <button className="btn btn-danger btn-sm" style={{marginLeft: "10px"}} onClick={ () =>
+                          handleDeleteProduct(singleProducts.id!)}>Delete</button>
                       </td>
                   </tr>
                   )) : (

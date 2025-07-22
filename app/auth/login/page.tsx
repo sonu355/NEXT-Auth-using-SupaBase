@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import { myAppHook } from "@/context/AppUtils";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { Router } from "next/router";
 
 const formSchema = yup.object().shape({
    email: yup.string().email("Invalid email value").required("email value is required"),
@@ -69,6 +70,10 @@ export default function Login(){
         }
     }
 
+    const handleRegisterRedirect = () => {
+        router.push("/auth/register")
+    }
+
     return <>
         <Navbar />
         <div className="container mt-5">
@@ -92,7 +97,7 @@ export default function Login(){
                 <button className="btn btn-dark mx-2" onClick={ () => handleSocialOauth("github") }>Github</button>
             </div>
             <p className="text-center mt-3">
-                Don't have an account <a href="/auth/register">Register</a>
+                Don't have an account <a onClick={ handleRegisterRedirect} style={{ cursor: "pointer"}}>Register</a>
             </p>
         </div>
         <Footer />

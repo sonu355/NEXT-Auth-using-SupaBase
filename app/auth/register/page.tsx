@@ -55,6 +55,10 @@ export default function Register(){
         }
     }
 
+    const handleLoginRegister = () => {
+        router.push("/auth/login")
+    }
+
     return <>
         <Navbar />
         <div className="container mt-5">
@@ -105,7 +109,7 @@ export default function Register(){
                 <button type="submit" className="btn btn-primary w-100">Register</button>
             </form>
             <p className="text-center mt-3">
-                Already have an account? <a href="/auth/login">Login</a>
+                Already have an account? <a onClick={ handleLoginRegister } style={{ cursor: "pointer"}}>Login</a>
             </p>
         </div>
         <Footer />
